@@ -594,9 +594,9 @@ function MainApp() {
   return (
     <div className="min-h-screen flex flex-col items-center pb-12 px-4" dir="rtl">
       {/* Header */}
-      <header className="w-full bg-gradient-to-br from-black/80 to-gold/15 border-b-3 border-gold rounded-b-[30px] py-8 text-center shadow-2xl mb-6">
-        <h1 className="text-gold text-5xl md:text-6xl font-quran drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]">سلسلہ سیفیہ</h1>
-        <div className="mt-3 bg-white/10 px-6 py-1.5 rounded-full inline-block text-gray-200 text-lg tracking-wider">
+      <header className="w-full bg-gradient-to-br from-black/85 to-gold/10 border-b-4 border-gold rounded-b-[40px] py-10 text-center shadow-2xl mb-8 relative">
+        <h1 className="text-gold text-6xl md:text-7xl font-nastaleeq drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-tight">سلسلہ سیفیہ</h1>
+        <div className="mt-4 text-gold-light/90 text-xl md:text-2xl font-nastaleeq tracking-wide">
           نقشبندیہ • چشتیہ • قادریہ • سہروردیہ
         </div>
       </header>
@@ -930,7 +930,7 @@ function MainApp() {
               یہ ڈیجیٹل روحانی خزانہ (ایپ) پیرِ طریقت، رہبرِ شریعت حضرت مولانا <strong className="text-gold-light">محمد الیاس نقشبندی، چشتی، قادری، سہروردی، سیفی</strong> مدظلہ العالی (آستانہ عالیہ نقشبندیہ سیفیہ، گوجرخان) کی سرپرستی اور خصوصی ایماء پر تیار کی گئی ہے۔
             </p>
             <p>
-              اس ایپ کو تمام سالکینِ طریقت کے لیے جدید تقاضوں کے مطابق مرتب کرنے کی سعادت <strong className="text-gold-light">خادم حافظ محمد حفیظ سیفی</strong> نے حاصل کی۔
+              اس ایپ کو تمام سالکینِ طریقت کے لیے جدید تقاضوں کے مطابق مرتب کرنے کی سعادت <strong className="text-gold-light">خادم محمد حفیظ سیفی اور محمد وقار علی سیفی</strong> نے حاصل کی۔
             </p>
             <p className="text-green-300 italic text-base mt-4">
               دعا ہے کہ اللہ رب العزت اپنے پیارے حبیب ﷺ اور مشائخ عظام کے صدقے اس ادنیٰ سی کاوش کو شرفِ قبولیت بخشے اور تمام سالکین کے لیے نفع بخش بنائے۔ آمین۔
