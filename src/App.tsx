@@ -696,9 +696,45 @@ function MainApp() {
           <div className="text-lg mb-1 text-gray-300">
             {(() => {
               try {
-                return formatInTimeZone(currentTime, location.timezone || "Asia/Karachi", 'EEEE, d MMMM yyyy');
+                const gregDate = formatInTimeZone(currentTime, location.timezone || "Asia/Karachi", 'EEEE, d MMMM yyyy');
+                
+                // Manual Hijri Calculation (Tabular Islamic Calendar)
+                // Reference: March 25, 2026 is 5 Shawwal 1447
+                const hijriMonths = [
+                  "محرم", "صفر", "ربیع الاول", "ربیع الثانی", "جمادی الاول", "جمادی الثانی",
+                  "رجب", "شعبان", "رمضان", "شوال", "ذوالقعدہ", "ذوالحجہ"
+                ];
+                
+                const m = currentTime.getMonth() + 1;
+                const y = currentTime.getFullYear();
+                const d = currentTime.getDate();
+
+                const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + (2 - Math.floor(y / 100) + Math.floor(Math.floor(y / 100) / 4)) - 1524.5;
+                
+                // Adjustment to match user's local sighting (5 Shawwal on March 25, 2026)
+                const ijd = Math.floor(jd) - 1948440 + 10632; 
+                const n = Math.floor((ijd - 1) / 10631);
+                const l = ijd - 10631 * n + 354;
+                const j = (Math.floor((10985 - l) / 5316)) * (Math.floor((50 * l) / 17719)) + (Math.floor(l / 5670)) * (Math.floor((43 * l) / 15238));
+                const k = l - (Math.floor((30 - j) / 15)) * (Math.floor((17719 * j) / 50)) - (Math.floor(j / 16)) * (Math.floor((15238 * j) / 43)) + 29;
+                const hMonthIdx = Math.floor((24 * k) / 709);
+                const hDay = k - Math.floor((709 * hMonthIdx) / 24);
+                const hYear = 30 * n + j - 30;
+                
+                const hijriDate = `${hDay} ${hijriMonths[hMonthIdx - 1]} ${hYear}ھ`;
+
+                return (
+                  <div className="flex flex-col gap-1">
+                    <span>{gregDate}</span>
+                    <span className="text-gold-light font-bold text-2xl">{hijriDate}</span>
+                  </div>
+                );
               } catch (e) {
-                return formatInTimeZone(currentTime, "Asia/Karachi", 'EEEE, d MMMM yyyy');
+                return (
+                  <div className="flex flex-col gap-1">
+                    <span>{formatInTimeZone(currentTime, "Asia/Karachi", 'EEEE, d MMMM yyyy')}</span>
+                  </div>
+                );
               }
             })()}
           </div>
