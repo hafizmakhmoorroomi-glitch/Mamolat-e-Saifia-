@@ -18,7 +18,11 @@ import {
   Sun,
   Sunrise,
   Sunset,
-  Zap
+  Zap,
+  Play,
+  Pause,
+  Volume2,
+  Loader2
 } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
 import { cn } from './lib/utils';
@@ -236,9 +240,10 @@ interface AccordionProps {
   title: string;
   children: React.ReactNode;
   onOpen?: () => void;
+  extra?: React.ReactNode;
 }
 
-const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen }) => {
+const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen, extra }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const handleToggle = () => {
@@ -249,13 +254,16 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen }) => {
 
   return (
     <div className="bg-black/60 border border-gold rounded-xl overflow-hidden mb-3 shadow-lg">
-      <button 
-        onClick={handleToggle}
-        className="w-full bg-gold/15 p-4 flex justify-between items-center text-gold-light font-bold text-lg text-right"
-      >
-        <span>{title}</span>
-        {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-      </button>
+      <div className="w-full bg-gold/15 flex justify-between items-center text-gold-light font-bold text-lg text-right">
+        <button 
+          onClick={handleToggle}
+          className="flex-1 p-4 flex justify-between items-center"
+        >
+          <span>{title}</span>
+          {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+        {extra && <div className="pl-4">{extra}</div>}
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.div 
@@ -278,6 +286,73 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Using QuranicAudio.com - extremely reliable and standard source
+  const paddedSurahNum = surahNum.toString().padStart(3, '0');
+  const audioUrl = `https://download.quranicaudio.com/quran/ahmed_ajamy/${paddedSurahNum}.mp3`;
+
+  const toggleAudio = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      setAudioError(false);
+      
+      // If there was an error before, we might need to reload the source
+      if (audioError) {
+        audioRef.current.load();
+      }
+
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        setIsAudioLoading(true);
+        playPromise
+          .then(() => {
+            setIsAudioLoading(false);
+          })
+          .catch(err => {
+            console.error("Audio playback failed:", err.message);
+            setIsPlaying(false);
+            setIsAudioLoading(false);
+            // Only set error if it's not a simple interruption
+            if (err.name !== 'AbortError') {
+              setAudioError(true);
+            }
+          });
+      }
+    }
+  };
+
+  const handleAudioError = () => {
+    const error = audioRef.current?.error;
+    console.error("Audio Error Details:", {
+      code: error?.code,
+      message: error?.message,
+      url: audioUrl
+    });
+    // Don't show error if it's just a transition or empty src
+    if (audioRef.current?.src) {
+      setAudioError(true);
+      setIsPlaying(false);
+      setIsAudioLoading(false);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
 
   const fetchSurah = async () => {
     const cached = localStorage.getItem(`surah_${surahNum}`);
@@ -302,8 +377,55 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   };
 
   return (
-    <Accordion title={surahName} onOpen={fetchSurah}>
+    <Accordion 
+      title={surahName} 
+      onOpen={fetchSurah}
+      extra={
+        <button 
+          onClick={toggleAudio}
+          disabled={isAudioLoading}
+          className={cn(
+            "p-2 rounded-full transition-all flex items-center justify-center",
+            isPlaying ? "bg-gold text-black scale-110" : "bg-gold/20 text-gold hover:bg-gold/40",
+            isAudioLoading && "opacity-50 cursor-wait"
+          )}
+          title={isPlaying ? "روکیں" : "سنیں (قاری احمد العمجی)"}
+        >
+          {isAudioLoading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isPlaying ? (
+            <Pause className="w-4 h-4" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+        </button>
+      }
+    >
       <div className="max-height-[400px] overflow-y-auto quran-box">
+        <audio 
+          ref={audioRef} 
+          src={audioUrl} 
+          onPlay={() => {
+            setIsPlaying(true);
+            setIsAudioLoading(false);
+          }}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          onError={handleAudioError}
+          onWaiting={() => setIsAudioLoading(true)}
+          onCanPlayThrough={() => setIsAudioLoading(false)}
+          preload="metadata"
+          crossOrigin="anonymous"
+        />
+        <div className="flex flex-col items-center mb-4 gap-2">
+          <div className="bg-gold/10 border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2 text-gold-light text-sm">
+            <Volume2 className="w-4 h-4" />
+            <span>تلاوت: قاری احمد العمجی</span>
+          </div>
+          {audioError && (
+            <div className="text-red-400 text-xs font-bold">تلاوت لوڈ نہیں ہو سکی۔ انٹرنیٹ چیک کریں۔</div>
+          )}
+        </div>
         {loading && <div className="text-center text-green-300 py-4">لوڈ ہو رہا ہے...</div>}
         {error && <div className="text-center text-red-400 py-4">انٹرنیٹ کا مسئلہ ہے۔</div>}
         {text && <span className="arabic-text text-2xl text-gold-light leading-[2.2] block text-center drop-shadow-md">{text}</span>}
@@ -808,11 +930,7 @@ function MainApp() {
         {/* Quranic Surahs */}
         <SectionTitle>قرآنی سورتیں (معمولات)</SectionTitle>
         <QuranBox surahNum={36} surahName="نماز فجر (سورہ یٰسین)" />
-        <Accordion title="نماز ظہر (سورہ فتح کا آخری رکوع)">
-          <span className="arabic-text text-2xl text-gold-light leading-[2.2] block text-center drop-shadow-md">
-            لَّقَدْ صَدَقَ اللَّهُ رَسُولَهُ الرُّؤْيَا بِالْحَقِّ ۖ لَتَدْخُلُنَّ الْمَسْجِدَ الْحَرَامَ إِن شَاءَ اللَّهُ آمِنِينَ مُحَلِّقِينَ رُءُوسَكُمْ وَمُقَصِّرِينَ لَا تَخَافُونَ ۖ فَعَلِمَ مَا لَمْ تَعْلَمُوا فَجَعَلَ مِن دُونِ ذَٰلِكَ فَتْحًا قَرِيبًا ﴿٢٧﴾ هُوَ الَّذِي أَرْسَلَ رَسُولَهُ بِالْهُدَىٰ وَدِينِ الْحَقِّ لِيُظْهِرَهُ عَلَى الدِّينِ كُلِّهِ ۚ وَكَفَىٰ بِاللَّهِ شَهِيدًا ﴿٢٨﴾ مُّحَمَّدٌ رَّسُولُ اللَّهِ ۚ وَالَّذِينَ مَعَهُ أَشِدَّاءُ عَلَى الْكُفَّارِ رُحَمَاءُ بَيْنَهُمْ ۖ تَرَاهُمْ رُكَّعًا سُجَّدًا يَبْتَغُونَ فَضْلًا مِّنَ اللَّهِ وَرِضْوَانًا ۖ سِيمَاهُمْ فِي وُجُوهِهِم مِّنْ أَثَرِ السُّجُودِ ۚ ذَٰلِكَ مَثَلُهُمْ فِي التَّوْرَاةِ ۚ وَمَثَلُهُمْ فِي الْإِنجِيلِ كَزَرْعٍ أَخْرَجَ شَطْأَهُ فَآزَرَهُ فَاسْتَغْلَظَ فَاسْتَوَىٰ عَلَىٰ سُوقِهِ يُعْجِبُ الزُّرَّاعَ لِيَغِيظَ بِهِمُ الْكُفَّارَ ۗ وَعَدَ اللَّهُ الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ مِنْهُم مَّغْفِرَةً وَأَجْرًا عَظِيمًا ﴿٢٩﴾
-          </span>
-        </Accordion>
+        <QuranBox surahNum={48} surahName="نماز ظہر (سورہ فتح)" />
         <QuranBox surahNum={78} surahName="نماز عصر (سورہ نبا)" />
         <QuranBox surahNum={56} surahName="نماز مغرب (سورہ واقعہ)" />
         <QuranBox surahNum={67} surahName="نماز عشاء (سورہ ملک)" />
