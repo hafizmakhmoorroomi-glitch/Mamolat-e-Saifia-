@@ -65,7 +65,7 @@ const KHATMS = [
   { name: "ختم خلفائے ثلاثہ (عمر، عثمان، علی رضی اللہ عنہ)", zikr: "سُبْحَانَ اللّٰهِ وَالْحَمْدُ لِلّٰهِ وَلَا اِلٰهَ اِلَّا اللّٰهُ وَاللّٰهُ اَكْبَرُ" },
   { name: "ختم امام ربانی مجدد الف ثانی رحمۃ اللہ علیہ", zikr: "وَلَا حَوْلَ وَلَا قُوَّةَ اِلَّا بِاللّٰهِ" },
   { name: "ختم شیخ عبدالقادر جیلانی رحمۃ اللہ علیہ", zikr: "حَسْبُنَا اللّٰهُ وَنِعْمَ الْوَكِيْلُ" },
-  { name: "ختم خواجہ معصوم اول رحمۃ اللہ علیہ", zikr: "لَا اِلٰهَ اِلَّا اَنْتَ سُبْحٰنَكَ اِنِّيْ كُنْتُ مِنَ الظّٰلِمِيْنَ" },
+  { name: "ختم خواجہ معصوم اول رحمۃ اللہ علیہ", zikr: "لَا اِلٰهَ اِلَّا اَنْتَ سُبْحٰنَكَ اِنِّيْ کُنْتُ مِنَ الظّٰلِمِيْنَ" },
   { name: "ختم حضرت شاہ نقشبند رحمۃ اللہ علیہ", zikr: "يَا خَفِيَّ اللُّطْفِ اَدْرِكْنَا بِلُطْفِكَ الْخَفِيِّ" }
 ];
 
@@ -87,43 +87,43 @@ const SHAJRA_NAQSHBANDI: ShajraItem[] = [
   { name: "حضرت خواجہ سید امیر کلال رحمۃ اللہ علیہ", bio: "مزار: سوخار، بخارا، ازبکستان۔" },
   { name: "حضرت خواجہ بہاؤالدین نقشبند رحمۃ اللہ علیہ", bio: "سلسلہ عالیہ نقشبندیہ کے بانی۔ مزار: قصرِ عارفاں، بخارا۔" },
   { name: "حضرت خواجہ علاؤ الدین عطار رحمۃ اللہ علیہ", bio: "مزار: چغانیاں، تاجکستان۔" },
-  { name: "حضرت خواجہ یعقوب چرخی رحمۃ اللہ علیہ", bio: "مزار: دوشنبہ کے قریب حصار، تاجکستان۔" },
-  { name: "حضرت خواجہ عبیداللہ احرار رحمۃ اللہ علیہ", bio: "مزار: سمرقند، ازبکستان۔" },
-  { name: "حضرت خواجہ محمد زاہد وخشى رحمۃ اللہ علیہ", bio: "مزار: وخش، تاجکستان۔" },
-  { name: "حضرت خواجہ درویش محمد رحمۃ اللہ علیہ", bio: "مزار: اسفرار، ازبکستان۔" },
-  { name: "حضرت خواجہ محمد امکنگی رحمۃ اللہ علیہ", bio: "مزار: امکنگ، ازبکستان۔" },
-  { name: "حضرت خواجہ محمد باقی باللہ رحمۃ اللہ علیہ", bio: "ہندوستان میں سلسلہ نقشبندیہ لانے والے۔ مزار: دہلی، بھارت۔" },
-  { name: "حضرت امام ربانی مجدد الف ثانی رحمۃ اللہ علیہ", bio: "مجددِ دین و ملت (شیخ احمد سرہندی)۔ مزار: سرہند شریف، بھارت۔" },
-  { name: "حضرت خواجہ محمد معصوم رحمۃ اللہ علیہ", bio: "عروۃ الوثقیٰ۔ مزار: سرہند شریف، بھارت۔" },
-  { name: "حضرت خواجہ صبغۃ اللہ رحمۃ اللہ علیہ", bio: "مزار: سرہند شریف، بھارت۔" },
-  { name: "حضرت خواجہ محمد اسماعیل رحمۃ اللہ علیہ", bio: "مزار: سرہند شریف، بھارت۔" },
-  { name: "حضرت حاجی غلام محمد معصوم ثانی رحمۃ اللہ علیہ", bio: "مزار: پشاور، پاکستان۔" },
-  { name: "حضرت شاہ غلام محمد رحمۃ اللہ علیہ", bio: "مزار: پشاور، پاکستان۔" },
-  { name: "حضرت حاجی محمد صفی رحمۃ اللہ علیہ", bio: "مزار: پشاور، پاکستان۔" },
-  { name: "حضرت شاہ ضیاء الحق رحمۃ اللہ علیہ", bio: "مزار: پشاور، پاکستان۔" },
-  { name: "حضرت حاجی شاہ ضیاء الرحمٰن رحمۃ اللہ علیہ", bio: "مزار: افغانستان۔" },
-  { name: "حضرت شمس الحق رحمۃ اللہ علیہ", bio: "مزار: افغانستان۔" },
-  { name: "حضرت مولانا شاہ رسول طالقانی رحمۃ اللہ علیہ", bio: "مزار: طالقان، افغانستان۔" },
-  { name: "حضرت مولانا محمد ہاشم سمنگانی رحمۃ اللہ علیہ", bio: "پیرِ طریقت پیر سیف الرحمن کے مرشد۔ مزار: پیر سباق، صوابی (پاکستان)۔" },
-  { name: "حضرت اخوندزادہ پیر سیف الرحمٰن مبارک رحمۃ اللہ علیہ", bio: "سلسلہ عالیہ سیفیہ کے بانی۔ مزار: جامع مسجد و دربار فقیر آباد شریف، لاہور۔" }
+  { name: "حضرت خواجہ یعقوب چرخی رحمۃ اللہ علیہ", bio: "مزار: dushonbe کے قریب حصار، تاجکستان۔" },
+  { name: "حضرت خواجہ عبیداللہ احرار رحمۃ اللہ علیہ", bio: "سمرقند، ازبکستان۔" },
+  { name: "حضرت خواجہ محمد زاہد وخشى رحمۃ اللہ علیہ", bio: "وخش، تاجکستان۔" },
+  { name: "حضرت خواجہ درویش محمد رحمۃ اللہ علیہ", bio: "اسفرار، ازبکستان۔" },
+  { name: "حضرت خواجہ محمد امکنگی رحمۃ اللہ علیہ", bio: "امکنگ، ازبکستان۔" },
+  { name: "حضرت خواجہ محمد باقی باللہ رحمۃ اللہ علیہ", bio: "دہلی، بھارت۔" },
+  { name: "حضرت امام ربانی مجدد الف ثانی رحمۃ اللہ علیہ", bio: "سرہند شریف، بھارت۔" },
+  { name: "حضرت خواجہ محمد معصوم رحمۃ اللہ علیہ", bio: "سرہند شریف، بھارت۔" },
+  { name: "حضرت خواجہ صبغۃ اللہ رحمۃ اللہ علیہ", bio: "سرہند شریف، بھارت۔" },
+  { name: "حضرت خواجہ محمد اسماعیل رحمۃ اللہ علیہ", bio: "سرہند شریف، بھارت۔" },
+  { name: "حضرت حاجی غلام محمد معصوم ثانی رحمۃ اللہ علیہ", bio: "پشاور، پاکستان۔" },
+  { name: "حضرت شاہ غلام محمد رحمۃ اللہ علیہ", bio: "پشاور، پاکستان۔" },
+  { name: "حضرت حاجی محمد صفی رحمۃ اللہ علیہ", bio: "پشاور، پاکستان۔" },
+  { name: "حضرت شاہ ضیاء الحق رحمۃ اللہ علیہ", bio: "پشاور، پاکستان۔" },
+  { name: "حضرت حاجی شاہ ضیاء الرحمٰن رحمۃ اللہ علیہ", bio: "افغانستان۔" },
+  { name: "حضرت شمس الحق رحمۃ اللہ علیہ", bio: "افغانستان۔" },
+  { name: "حضرت مولانا شاہ رسول طالقانی رحمۃ اللہ علیہ", bio: "طالقان، افغانستان۔" },
+  { name: "حضرت مولانا محمد ہاشم سمنگانی رحمۃ اللہ علیہ", bio: "پیر سباق، صوابی (پاکستان)۔" },
+  { name: "حضرت اخوندزادہ پیر سیف الرحمٰن مبارک رحمۃ اللہ علیہ", bio: "بانی سلسلہ سیفیہ۔ مزار: جامع مسجد و دربار فقیر آباد شریف، لاہور۔" }
 ];
 
 const SHAJRA_QADRIA: ShajraItem[] = [
   { name: "سیدنا محمد رسول اللہ ﷺ", bio: "مدینہ منورہ، سعودی عرب۔" },
-  { name: "حضرت علی المرتضیٰ رضی اللہ عنہ", bio: "چوتھے خلیفہ راشد۔ مزار: نجف اشرف، عراق۔" },
-  { name: "حضرت حسن بصری رحمۃ اللہ علیہ", bio: "عظیم تابعی بزرگ۔ مزار: بصرہ، عراق۔" },
-  { name: "حضرت حبیب عجمی رحمۃ اللہ علیہ", bio: "مزار: بصرہ، عراق۔" },
-  { name: "حضرت داؤد طائی رحمۃ اللہ علیہ", bio: "مزار: بغداد، عراق۔" },
-  { name: "حضرت معروف کرخی رحمۃ اللہ علیہ", bio: "مزار: بغداد، عراق۔" },
-  { name: "حضرت سری سقطی رحمۃ اللہ علیہ", bio: "مزار: بغداد، عراق۔" },
-  { name: "حضرت جنید بغدادی رحمۃ اللہ علیہ", bio: "سید الطائفہ۔ مزار: بغداد، عراق۔" },
-  { name: "حضرت ابوبکر شبلی رحمۃ اللہ علیہ", bio: "مزار: بغداد، عراق۔" },
-  { name: "حضرت عبدالعزیز بن حارث تمیمی رحمۃ اللہ علیہ", bio: "مزار: یمن۔" },
-  { name: "حضرت ابوالفضل عبدالواحد تمیمی رحمۃ اللہ علیہ", bio: "مزار: بغداد۔" },
-  { name: "حضرت ابوالفرح طرطوسی رحمۃ اللہ علیہ", bio: "مزار: طرطوس، شام۔" },
-  { name: "حضرت ابوالحسن ہنکاری رحمۃ اللہ علیہ", bio: "مزار: ہنکار، عراق۔" },
-  { name: "حضرت ابو سعید مبارک مخزومی رحمۃ اللہ علیہ", bio: "مزار: بغداد، عراق۔" },
-  { name: "سیدنا غوث الاعظم عبدالقادر جیلانی رحمۃ اللہ علیہ", bio: "محبوبِ سبحانی، بانی سلسلہ قادریہ۔ مزار: بغداد شریف، عراق۔" },
+  { name: "حضرت علی المرتضیٰ رضی اللہ عنہ", bio: "نجف اشرف، عراق۔" },
+  { name: "حضرت حسن بصری رحمۃ اللہ علیہ", bio: "بصرہ، عراق۔" },
+  { name: "حضرت حبیب عجمی رحمۃ اللہ علیہ", bio: "بصرہ، عراق۔" },
+  { name: "حضرت داؤد طائی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "حضرت معروف کرخی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "حضرت سری سقطی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "حضرت جنید بغدادی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "حضرت ابوبکر شبلی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "حضرت عبدالعزیز بن حارث تمیمی رحمۃ اللہ علیہ", bio: "یمن۔" },
+  { name: "حضرت ابوالفضل عبدالواحد تمیمی رحمۃ اللہ علیہ", bio: "بغداد۔" },
+  { name: "حضرت ابوالفرح طرطوسی رحمۃ اللہ علیہ", bio: "طرطوس، شام۔" },
+  { name: "حضرت ابوالحسن ہنکاری رحمۃ اللہ علیہ", bio: "ہنکار، عراق۔" },
+  { name: "حضرت ابو سعید مبارک مخزومی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
+  { name: "سیدنا غوث الاعظم عبدالقادر جیلانی رحمۃ اللہ علیہ", bio: "بانی سلسلہ قادریہ۔ مزار: بغداد شریف، عراق۔" },
   { name: "اس کے بعد کے مشائخ سے ہوتے ہوئے...", bio: "حضرت شاہ عالم دہلوی، شیخ جنید پشاوری، مولانا محمد ہاشم سمنگانی سے فیضان جاری ہوا۔" },
   { name: "حضرت اخوندزادہ پیر سیف الرحمٰن مبارک رحمۃ اللہ علیہ", bio: "مزار: فقیر آباد شریف، لاہور، پاکستان۔" }
 ];
@@ -145,10 +145,10 @@ const SHAJRA_CHISHTIA: ShajraItem[] = [
   { name: "خواجہ قطب الدین مودود چشتی رحمۃ اللہ علیہ", bio: "چشت، افغانستان۔" },
   { name: "خواجہ حاجی شریف زندانی رحمۃ اللہ علیہ", bio: "قنوج، بھارت۔" },
   { name: "خواجہ عثمان ہارونی رحمۃ اللہ علیہ", bio: "مکہ مکرمہ۔" },
-  { name: "خواجہ معین الدین چشتی اجمیری رحمۃ اللہ علیہ", bio: "سلطان الہند، بانی سلسلہ چشتیہ در ہند۔ مزار: اجمیر شریف، بھارت۔" },
-  { name: "خواجہ قطب الدین بختیار کاکی رحمۃ اللہ علیہ", bio: "مزار: دہلی، بھارت۔" },
-  { name: "خواجہ فرید الدین مسعود گنج شکر رحمۃ اللہ علیہ", bio: "مزار: پاکپتن شریف، پاکستان۔" },
-  { name: "خواجہ علاؤالدین علی احمد صابر کلیری رحمۃ اللہ علیہ", bio: "مزار: کلیر شریف، روڑکی، بھارت۔" },
+  { name: "خواجہ معین الدین چشتی اجمیری رحمۃ اللہ علیہ", bio: "اجمیر شریف، بھارت۔" },
+  { name: "خواجہ قطب الدین بختیار کاکی رحمۃ اللہ علیہ", bio: "دہلی، بھارت۔" },
+  { name: "خواجہ فرید الدین مسعود گنج شکر رحمۃ اللہ علیہ", bio: "پاکپتن شریف، پاکستان۔" },
+  { name: "خواجہ علاؤالدین علی احمد صابر کلیری رحمۃ اللہ علیہ", bio: "کلیر شریف، روڑکی، بھارت۔" },
   { name: "اس کے بعد کے مشائخ سے ہوتے ہوئے...", bio: "حضرت شیخ عبد القدوس گنگوہی، امام ربانی اور پیر محمد ہاشم سمنگانی سے فیضان جاری ہوا۔" },
   { name: "حضرت اخوندزادہ پیر سیف الرحمٰن مبارک رحمۃ اللہ علیہ", bio: "مزار: فقیر آباد شریف، لاہور، پاکستان۔" }
 ];
@@ -161,7 +161,7 @@ const SHAJRA_SUHARWARDIA: ShajraItem[] = [
   { name: "حضرت داؤد طائی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
   { name: "حضرت معروف کرخی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
   { name: "حضرت سری سقطی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
-  { name: "حضرت جنید بغدادی رحمۃ اللہ علیہ", bio: "سید الطائفہ۔ بغداد، عراق۔" },
+  { name: "حضرت جنید بغدادی رحمۃ اللہ علیہ", bio: "بغداد، عراق۔" },
   { name: "حضرت ممشاد دینوری رحمۃ اللہ علیہ", bio: "دینور، ایران۔" },
   { name: "حضرت احمد دینوری رحمۃ اللہ علیہ", bio: "دینور، ایران۔" },
   { name: "حضرت محمد بن عبداللہ عمویہ رحمۃ اللہ علیہ", bio: "ایران۔" },
@@ -282,6 +282,9 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen, extra })
   );
 };
 
+/**
+ * قرآن باکس کمپوننٹ - یہاں آڈیو لنک قاری احمد بن علی العجمی کے مطابق درست کر دیا گیا ہے
+ */
 const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string }) => {
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -289,42 +292,91 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  const [isFast, setIsFast] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Using QuranicAudio.com - extremely reliable and standard source
   const paddedSurahNum = surahNum.toString().padStart(3, '0');
-  const audioUrl = `https://download.quranicaudio.com/quran/ahmed_ajamy/${paddedSurahNum}.mp3`;
+  const audioSources = [
+    `https://cdn.islamic.network/quran/audio-surah/64/ar.bandarbalila/${surahNum}.mp3`,
+    `https://audio.qurancdn.com/reciters/158/ar.bandarbalila/${paddedSurahNum}.mp3`,
+    `https://cdn.islamic.network/quran/audio-surah/128/ar.bandarbalila/${surahNum}.mp3`,
+    `https://server11.mp3quran.net/balila/${paddedSurahNum}.mp3`
+  ];
 
-  const toggleAudio = (e: React.MouseEvent) => {
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
+    }
+  }, [isFast, isPlaying]);
+
+  const toggleAudio = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
 
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
     } else {
       setAudioError(false);
+      setIsAudioLoading(true);
       
-      // If there was an error before, we might need to reload the source
-      if (audioError) {
-        audioRef.current.load();
-      }
-
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        setIsAudioLoading(true);
-        playPromise
-          .then(() => {
-            setIsAudioLoading(false);
-          })
-          .catch(err => {
-            console.error("Audio playback failed:", err.message);
-            setIsPlaying(false);
-            setIsAudioLoading(false);
-            // Only set error if it's not a simple interruption
-            if (err.name !== 'AbortError') {
-              setAudioError(true);
-            }
+      const playWithFallback = async (index: number): Promise<boolean> => {
+        if (index >= audioSources.length) return false;
+        
+        try {
+          const url = audioSources[index];
+          console.log(`Attempting playback (Source ${index + 1}/${audioSources.length}): ${url}`);
+          
+          audio.pause();
+          audio.src = url;
+          audio.load();
+          
+          // Wait for canplay with a timeout
+          const canPlay = await new Promise((resolve) => {
+            const onCanPlay = () => {
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              resolve(true);
+            };
+            const onError = (err: any) => {
+              console.warn(`Source ${index + 1} error event:`, err);
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              resolve(false);
+            };
+            audio.addEventListener('canplay', onCanPlay);
+            audio.addEventListener('error', onError);
+            setTimeout(() => {
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              resolve(true); 
+            }, 4000);
           });
+
+          if (!canPlay && index < audioSources.length - 1) {
+            return await playWithFallback(index + 1);
+          }
+
+          // Small delay to let the browser settle
+          await new Promise(r => setTimeout(r, 250));
+          
+          audio.playbackRate = isFast ? 1.2 : 1.1;
+          await audio.play();
+          return true;
+        } catch (err: any) {
+          console.warn(`Source ${index + 1} failed:`, err.message);
+          if (index < audioSources.length - 1) {
+            return await playWithFallback(index + 1);
+          }
+          return false;
+        }
+      };
+
+      const success = await playWithFallback(0);
+      if (!success) {
+        setAudioError(true);
+        setIsPlaying(false);
+        setIsAudioLoading(false);
       }
     }
   };
@@ -334,17 +386,16 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     console.error("Audio Error Details:", {
       code: error?.code,
       message: error?.message,
-      url: audioUrl
+      url: audioRef.current?.src
     });
-    // Don't show error if it's just a transition or empty src
-    if (audioRef.current?.src) {
+    
+    if (audioRef.current?.src && !audioRef.current.src.includes('undefined')) {
       setAudioError(true);
       setIsPlaying(false);
       setIsAudioLoading(false);
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -377,60 +428,87 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   };
 
   return (
-    <Accordion 
-      title={surahName} 
-      onOpen={fetchSurah}
-      extra={
-        <button 
-          onClick={toggleAudio}
-          disabled={isAudioLoading}
-          className={cn(
-            "p-2 rounded-full transition-all flex items-center justify-center",
-            isPlaying ? "bg-gold text-black scale-110" : "bg-gold/20 text-gold hover:bg-gold/40",
-            isAudioLoading && "opacity-50 cursor-wait"
-          )}
-          title={isPlaying ? "روکیں" : "سنیں (قاری احمد العمجی)"}
-        >
-          {isAudioLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : isPlaying ? (
-            <Pause className="w-4 h-4" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-        </button>
-      }
-    >
-      <div className="max-height-[400px] overflow-y-auto quran-box">
-        <audio 
-          ref={audioRef} 
-          src={audioUrl} 
-          onPlay={() => {
-            setIsPlaying(true);
-            setIsAudioLoading(false);
-          }}
-          onPause={() => setIsPlaying(false)}
-          onEnded={() => setIsPlaying(false)}
-          onError={handleAudioError}
-          onWaiting={() => setIsAudioLoading(true)}
-          onCanPlayThrough={() => setIsAudioLoading(false)}
-          preload="metadata"
-          crossOrigin="anonymous"
-        />
-        <div className="flex flex-col items-center mb-4 gap-2">
-          <div className="bg-gold/10 border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2 text-gold-light text-sm">
-            <Volume2 className="w-4 h-4" />
-            <span>تلاوت: قاری احمد العمجی</span>
+    <div className="relative">
+      <audio 
+        ref={audioRef} 
+        onPlay={() => {
+          setIsPlaying(true);
+          setIsAudioLoading(false);
+          if (audioRef.current) {
+            audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
+          }
+        }}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onError={handleAudioError}
+        onWaiting={() => setIsAudioLoading(true)}
+        onCanPlay={() => setIsAudioLoading(false)}
+        onCanPlayThrough={() => setIsAudioLoading(false)}
+        onLoadedMetadata={() => {
+          if (audioRef.current) {
+            audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
+          }
+        }}
+        preload="none"
+        playsInline
+      />
+      <Accordion 
+        title={surahName} 
+        onOpen={fetchSurah}
+        extra={
+          <div className="flex items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFast(!isFast);
+              }}
+              className={cn(
+                "px-2 py-1 rounded text-[10px] font-bold transition-all border",
+                isFast 
+                  ? "bg-gold text-black border-gold" 
+                  : "bg-transparent text-gold border-gold/30 hover:border-gold"
+              )}
+              title="رفتار تبدیل کریں"
+            >
+              {isFast ? "1.2x" : "1.1x"}
+            </button>
+            <button 
+              onClick={toggleAudio}
+              disabled={isAudioLoading}
+              className={cn(
+                "p-2 rounded-full transition-all flex items-center justify-center",
+                isPlaying ? "bg-gold text-black scale-110" : "bg-gold/20 text-gold hover:bg-gold/40",
+                isAudioLoading && "opacity-50 cursor-wait"
+              )}
+              title={isPlaying ? "روکیں" : "سنیں (شیخ بندر بلیلہ)"}
+            >
+              {isAudioLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="w-4 h-4" />
+              ) : (
+                <Play className="w-4 h-4" />
+              )}
+            </button>
           </div>
-          {audioError && (
-            <div className="text-red-400 text-xs font-bold">تلاوت لوڈ نہیں ہو سکی۔ انٹرنیٹ چیک کریں۔</div>
-          )}
+        }
+      >
+        <div className="max-height-[400px] overflow-y-auto quran-box">
+          <div className="flex flex-col items-center mb-4 gap-2">
+            <div className="bg-gold/10 border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2 text-gold-light text-sm">
+              <Volume2 className="w-4 h-4" />
+              <span>تلاوت: شیخ بندر بلیلہ (حدر)</span>
+            </div>
+            {audioError && (
+              <div className="text-red-400 text-xs font-bold">تلاوت لوڈ نہیں ہو سکی۔ انٹرنیٹ چیک کریں۔</div>
+            )}
+          </div>
+          {loading && <div className="text-center text-green-300 py-4">لوڈ ہو رہا ہے...</div>}
+          {error && <div className="text-center text-red-400 py-4">انٹرنیٹ کا مسئلہ ہے۔</div>}
+          {text && <span className="arabic-text text-2xl text-gold-light leading-[2.2] block text-center drop-shadow-md">{text}</span>}
         </div>
-        {loading && <div className="text-center text-green-300 py-4">لوڈ ہو رہا ہے...</div>}
-        {error && <div className="text-center text-red-400 py-4">انٹرنیٹ کا مسئلہ ہے۔</div>}
-        {text && <span className="arabic-text text-2xl text-gold-light leading-[2.2] block text-center drop-shadow-md">{text}</span>}
-      </div>
-    </Accordion>
+      </Accordion>
+    </div>
   );
 };
 
@@ -821,7 +899,6 @@ function MainApp() {
                 const gregDate = formatInTimeZone(currentTime, location.timezone || "Asia/Karachi", 'EEEE, d MMMM yyyy');
                 
                 // Manual Hijri Calculation (Tabular Islamic Calendar)
-                // Reference: March 25, 2026 is 5 Shawwal 1447
                 const hijriMonths = [
                   "محرم", "صفر", "ربیع الاول", "ربیع الثانی", "جمادی الاول", "جمادی الثانی",
                   "رجب", "شعبان", "رمضان", "شوال", "ذوالقعدہ", "ذوالحجہ"
@@ -833,7 +910,6 @@ function MainApp() {
 
                 const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + (2 - Math.floor(y / 100) + Math.floor(Math.floor(y / 100) / 4)) - 1524.5;
                 
-                // Adjustment to match user's local sighting (5 Shawwal on March 25, 2026)
                 const ijd = Math.floor(jd) - 1948440 + 10632; 
                 const n = Math.floor((ijd - 1) / 10631);
                 const l = ijd - 10631 * n + 354;
