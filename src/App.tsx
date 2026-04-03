@@ -283,7 +283,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen, extra })
 };
 
 /**
- * قرآن باکس کمپوننٹ - یہاں آڈیو لنک قاری احمد بن علی العجمی کے مطابق درست کر دیا گیا ہے
+ * قرآن باکس کمپوننٹ - شیخ بندر بن بلیا
  */
 const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string }) => {
   const [text, setText] = useState<string | null>(null);
@@ -291,123 +291,63 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   const [error, setError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
-  const [audioError, setAudioError] = useState(false);
-  const [isFast, setIsFast] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const paddedSurahNum = surahNum.toString().padStart(3, '0');
-  const audioSources = [
-    `https://cdn.islamic.network/quran/audio-surah/64/ar.bandarbalila/${surahNum}.mp3`,
-    `https://audio.qurancdn.com/reciters/158/ar.bandarbalila/${paddedSurahNum}.mp3`,
-    `https://cdn.islamic.network/quran/audio-surah/128/ar.bandarbalila/${surahNum}.mp3`,
-    `https://server11.mp3quran.net/balila/${paddedSurahNum}.mp3`
-  ];
+  const audioUrl = surahNum === 78 
+    ? `https://server11.mp3quran.net/balila/078.mp3`
+    : `https://cdn.islamic.network/quran/audio-surah/128/ar.bandarbalila/${surahNum}.mp3`;
 
+  // Slightly Faster Speed for Bandar Balila
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
+      audioRef.current.playbackRate = 1.15;
     }
-  }, [isFast, isPlaying]);
+  }, [surahNum, isPlaying]);
 
-  const toggleAudio = async (e: React.MouseEvent) => {
+  const toggleAudio = (e: React.MouseEvent) => {
     e.stopPropagation();
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
+      setIsPlaying(false);
     } else {
-      setAudioError(false);
       setIsAudioLoading(true);
       
-      const playWithFallback = async (index: number): Promise<boolean> => {
-        if (index >= audioSources.length) return false;
-        
-        try {
-          const url = audioSources[index];
-          console.log(`Attempting playback (Source ${index + 1}/${audioSources.length}): ${url}`);
-          
-          audio.pause();
-          audio.src = url;
+      // Robust Loading: Ensure fresh source and load before play
+      if (audio.src !== audioUrl) {
+        audio.src = audioUrl;
+        audio.load();
+      }
+      
+      audio.playbackRate = 1.15;
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsAudioLoading(false);
+        })
+        .catch(err => {
+          console.log("Audio playback error, retrying load:", err);
+          // Auto-Recovery: call load() and then retry play()
           audio.load();
-          
-          // Wait for canplay with a timeout
-          const canPlay = await new Promise((resolve) => {
-            const onCanPlay = () => {
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              resolve(true);
-            };
-            const onError = (err: any) => {
-              console.warn(`Source ${index + 1} error event:`, err);
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              resolve(false);
-            };
-            audio.addEventListener('canplay', onCanPlay);
-            audio.addEventListener('error', onError);
-            setTimeout(() => {
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              resolve(true); 
-            }, 4000);
-          });
-
-          if (!canPlay && index < audioSources.length - 1) {
-            return await playWithFallback(index + 1);
-          }
-
-          // Small delay to let the browser settle
-          await new Promise(r => setTimeout(r, 250));
-          
-          audio.playbackRate = isFast ? 1.2 : 1.1;
-          await audio.play();
-          return true;
-        } catch (err: any) {
-          console.warn(`Source ${index + 1} failed:`, err.message);
-          if (index < audioSources.length - 1) {
-            return await playWithFallback(index + 1);
-          }
-          return false;
-        }
-      };
-
-      const success = await playWithFallback(0);
-      if (!success) {
-        setAudioError(true);
-        setIsPlaying(false);
-        setIsAudioLoading(false);
-      }
+          audio.play()
+            .then(() => {
+              setIsPlaying(true);
+              setIsAudioLoading(false);
+            })
+            .catch(retryErr => {
+              console.log("Retry failed:", retryErr);
+              setIsAudioLoading(false);
+              setIsPlaying(false);
+            });
+        });
     }
   };
-
-  const handleAudioError = () => {
-    const error = audioRef.current?.error;
-    console.error("Audio Error Details:", {
-      code: error?.code,
-      message: error?.message,
-      url: audioRef.current?.src
-    });
-    
-    if (audioRef.current?.src && !audioRef.current.src.includes('undefined')) {
-      setAudioError(true);
-      setIsPlaying(false);
-      setIsAudioLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-    };
-  }, []);
 
   const fetchSurah = async () => {
     const cached = localStorage.getItem(`surah_${surahNum}`);
-    if (cached) {
+    if (cached && cached !== "ERROR") {
       setText(cached);
       return;
     }
@@ -416,11 +356,14 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     setError(false);
     try {
       const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`);
+      if (!res.ok) throw new Error('API Error');
       const data = await res.json();
+      if (!data.data || !data.data.ayahs) throw new Error('Invalid Data');
       const fullText = data.data.ayahs.map((a: any) => a.text).join('  ');
       localStorage.setItem(`surah_${surahNum}`, fullText);
       setText(fullText);
     } catch (err) {
+      console.error(`Fetch error for Surah ${surahNum}:`, err);
       setError(true);
     } finally {
       setLoading(false);
@@ -434,22 +377,13 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
         onPlay={() => {
           setIsPlaying(true);
           setIsAudioLoading(false);
-          if (audioRef.current) {
-            audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
-          }
+          if (audioRef.current) audioRef.current.playbackRate = 1.15;
         }}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-        onError={handleAudioError}
         onWaiting={() => setIsAudioLoading(true)}
         onCanPlay={() => setIsAudioLoading(false)}
-        onCanPlayThrough={() => setIsAudioLoading(false)}
-        onLoadedMetadata={() => {
-          if (audioRef.current) {
-            audioRef.current.playbackRate = isFast ? 1.2 : 1.1;
-          }
-        }}
-        preload="none"
+        preload="metadata"
         playsInline
       />
       <Accordion 
@@ -457,21 +391,6 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
         onOpen={fetchSurah}
         extra={
           <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFast(!isFast);
-              }}
-              className={cn(
-                "px-2 py-1 rounded text-[10px] font-bold transition-all border",
-                isFast 
-                  ? "bg-gold text-black border-gold" 
-                  : "bg-transparent text-gold border-gold/30 hover:border-gold"
-              )}
-              title="رفتار تبدیل کریں"
-            >
-              {isFast ? "1.2x" : "1.1x"}
-            </button>
             <button 
               onClick={toggleAudio}
               disabled={isAudioLoading}
@@ -480,7 +399,7 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
                 isPlaying ? "bg-gold text-black scale-110" : "bg-gold/20 text-gold hover:bg-gold/40",
                 isAudioLoading && "opacity-50 cursor-wait"
               )}
-              title={isPlaying ? "روکیں" : "سنیں (شیخ بندر بلیلہ)"}
+              title={isPlaying ? "روکیں" : "سنیں (شیخ بندر بن بلیا)"}
             >
               {isAudioLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -497,11 +416,8 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
           <div className="flex flex-col items-center mb-4 gap-2">
             <div className="bg-gold/10 border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2 text-gold-light text-sm">
               <Volume2 className="w-4 h-4" />
-              <span>تلاوت: شیخ بندر بلیلہ (حدر)</span>
+              <span>تلاوت: شیخ بندر بن بلیا</span>
             </div>
-            {audioError && (
-              <div className="text-red-400 text-xs font-bold">تلاوت لوڈ نہیں ہو سکی۔ انٹرنیٹ چیک کریں۔</div>
-            )}
           </div>
           {loading && <div className="text-center text-green-300 py-4">لوڈ ہو رہا ہے...</div>}
           {error && <div className="text-center text-red-400 py-4">انٹرنیٹ کا مسئلہ ہے۔</div>}
@@ -575,12 +491,25 @@ function MainApp() {
     }
     return false;
   });
+  const [isTahajjudAlarmEnabled, setIsTahajjudAlarmEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('saifi_tahajjud_enabled') === 'true';
+    }
+    return false;
+  });
   const azanAudioRef = useRef<HTMLAudioElement | null>(null);
+  const tahajjudAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const toggleAzan = () => {
     const newValue = !isAzanEnabled;
     setIsAzanEnabled(newValue);
     localStorage.setItem('saifi_azan_enabled', newValue.toString());
+  };
+
+  const toggleTahajjudAlarm = () => {
+    const newValue = !isTahajjudAlarmEnabled;
+    setIsTahajjudAlarmEnabled(newValue);
+    localStorage.setItem('saifi_tahajjud_enabled', newValue.toString());
   };
 
   // --- Clock & Sync ---
@@ -628,9 +557,27 @@ function MainApp() {
           }
         }
       }
+
+      // Tahajjud Alarm Logic (30 mins before Fajr)
+      if (isTahajjudAlarmEnabled && prayerTimes && prayerTimes.Fajr) {
+        const tz = location.timezone || "Asia/Karachi";
+        let nowTimeStr = "00:00:00";
+        try {
+          nowTimeStr = formatInTimeZone(now, tz, 'HH:mm:ss');
+        } catch (e) {
+          nowTimeStr = formatInTimeZone(now, "Asia/Karachi", 'HH:mm:ss');
+        }
+
+        const tahajjudTime = addMins(prayerTimes.Fajr, -30);
+        if (tahajjudTime && `${tahajjudTime}:00` === nowTimeStr) {
+          if (tahajjudAudioRef.current) {
+            tahajjudAudioRef.current.play().catch(e => console.warn("Tahajjud alarm playback blocked", e));
+          }
+        }
+      }
     }, 1000);
     return () => clearInterval(timer);
-  }, [atomicOffset, isAzanEnabled, prayerTimes, location.timezone]);
+  }, [atomicOffset, isAzanEnabled, isTahajjudAlarmEnabled, prayerTimes, location.timezone]);
 
   // --- Location & Prayer Times ---
   const reverseGeocode = async (lat: number, lon: number) => {
@@ -961,7 +908,7 @@ function MainApp() {
         </section>
 
         {/* Prayer Times Grid */}
-        <div className="flex justify-center mb-2">
+        <div className="flex flex-wrap justify-center gap-3 mb-4">
           <button 
             onClick={toggleAzan}
             className={cn(
@@ -973,6 +920,19 @@ function MainApp() {
           >
             <span className="text-2xl">{isAzanEnabled ? "🔔" : "🔕"}</span>
             <span>{isAzanEnabled ? "اذان: آن" : "اذان: آف"}</span>
+          </button>
+
+          <button 
+            onClick={toggleTahajjudAlarm}
+            className={cn(
+              "flex items-center gap-3 px-6 py-2.5 rounded-full border-2 transition-all duration-300 font-bold text-lg shadow-lg",
+              isTahajjudAlarmEnabled 
+                ? "bg-blue-900/40 border-blue-400 text-blue-200 shadow-[0_0_20px_rgba(96,165,250,0.2)]" 
+                : "bg-black/40 border-gray-800 text-gray-500"
+            )}
+          >
+            <span className="text-2xl">{isTahajjudAlarmEnabled ? "⏰" : "💤"}</span>
+            <span>{isTahajjudAlarmEnabled ? "تہجد الارم: آن" : "تہجد الارم: آف"}</span>
           </button>
         </div>
         <SectionTitle>اوقاتِ نماز (فقہ حنفی)</SectionTitle>
@@ -1231,6 +1191,7 @@ function MainApp() {
         &copy; {new Date().getFullYear()} معمولاتِ سیفیہ - تمام حقوق محفوظ ہیں۔
       </footer>
       <audio ref={azanAudioRef} src="https://www.islamcan.com/audio/adhan/azan1.mp3" preload="auto" />
+      <audio ref={tahajjudAudioRef} src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3" preload="auto" />
     </div>
   );
 }
