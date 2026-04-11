@@ -497,6 +497,8 @@ function MainApp() {
     }
     return false;
   });
+  const [lastPlayedAzan, setLastPlayedAzan] = useState("");
+  const [lastPlayedTahajjud, setLastPlayedTahajjud] = useState("");
   const azanAudioRef = useRef<HTMLAudioElement | null>(null);
   const tahajjudAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -504,12 +506,83 @@ function MainApp() {
     const newValue = !isAzanEnabled;
     setIsAzanEnabled(newValue);
     localStorage.setItem('saifi_azan_enabled', newValue.toString());
+    // Play a short silent sound to unlock audio context
+    const audio = azanAudioRef.current;
+    if (newValue && audio) {
+      audio.load();
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => {
+        // Silent catch for unlock attempt
+      });
+    }
   };
 
   const toggleTahajjudAlarm = () => {
     const newValue = !isTahajjudAlarmEnabled;
     setIsTahajjudAlarmEnabled(newValue);
     localStorage.setItem('saifi_tahajjud_enabled', newValue.toString());
+    
+    const audio = tahajjudAudioRef.current;
+    if (audio) {
+      if (newValue) {
+        // Force load and play a short silent sound to unlock audio context
+        audio.load();
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        }).catch(() => {
+          // Silent catch for unlock attempt
+        });
+      } else {
+        // Stop audio if disabled
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    }
+  };
+
+  const testAzan = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const audio = azanAudioRef.current;
+    if (audio) {
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      } else {
+        audio.load();
+        audio.play().catch(err => {
+          if (err.name === 'AbortError') {
+            console.log("Azan play request was interrupted (normal).");
+          } else {
+            console.error("Azan test failed:", err);
+            alert("اذان کی آواز نہیں چل سکی۔ براہ کرم انٹرنیٹ چیک کریں۔");
+          }
+        });
+      }
+    }
+  };
+
+  const testTahajjud = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const audio = tahajjudAudioRef.current;
+    if (audio) {
+      if (!audio.paused) {
+        audio.pause();
+        audio.currentTime = 0;
+      } else {
+        audio.load();
+        audio.play().catch(err => {
+          if (err.name === 'AbortError') {
+            console.log("Tahajjud play request was interrupted (normal).");
+          } else {
+            console.error("Tahajjud test failed:", err);
+            alert("الارم کی آواز نہیں چل سکی۔ براہ کرم انٹرنیٹ چیک کریں۔");
+          }
+        });
+      }
+    }
   };
 
   // --- Clock & Sync ---
@@ -543,17 +616,22 @@ function MainApp() {
           nowTimeStr = formatInTimeZone(now, "Asia/Karachi", 'HH:mm:ss');
         }
 
-        const azanTimes = [
-          prayerTimes.Fajr,
-          prayerTimes.Dhuhr,
-          prayerTimes.Asr,
-          prayerTimes.Maghrib,
-          prayerTimes.Isha
-        ];
+        const currentMinute = nowTimeStr.substring(0, 5);
+        if (currentMinute !== lastPlayedAzan) {
+          const azanTimes = [
+            prayerTimes.Fajr,
+            prayerTimes.Dhuhr,
+            prayerTimes.Asr,
+            prayerTimes.Maghrib,
+            prayerTimes.Isha
+          ];
 
-        if (azanTimes.some(time => `${time}:00` === nowTimeStr)) {
-          if (azanAudioRef.current) {
-            azanAudioRef.current.play().catch(e => console.warn("Azan playback blocked by browser or failed", e));
+          if (azanTimes.includes(currentMinute)) {
+            if (azanAudioRef.current) {
+              azanAudioRef.current.play()
+                .then(() => setLastPlayedAzan(currentMinute))
+                .catch(e => console.warn("Azan playback blocked", e));
+            }
           }
         }
       }
@@ -568,16 +646,21 @@ function MainApp() {
           nowTimeStr = formatInTimeZone(now, "Asia/Karachi", 'HH:mm:ss');
         }
 
-        const tahajjudTime = addMins(prayerTimes.Fajr, -30);
-        if (tahajjudTime && `${tahajjudTime}:00` === nowTimeStr) {
-          if (tahajjudAudioRef.current) {
-            tahajjudAudioRef.current.play().catch(e => console.warn("Tahajjud alarm playback blocked", e));
+        const currentMinute = nowTimeStr.substring(0, 5);
+        if (currentMinute !== lastPlayedTahajjud) {
+          const tahajjudTime = addMins(prayerTimes.Fajr, -30);
+          if (tahajjudTime === currentMinute) {
+            if (tahajjudAudioRef.current) {
+              tahajjudAudioRef.current.play()
+                .then(() => setLastPlayedTahajjud(currentMinute))
+                .catch(e => console.warn("Tahajjud alarm playback blocked", e));
+            }
           }
         }
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [atomicOffset, isAzanEnabled, isTahajjudAlarmEnabled, prayerTimes, location.timezone]);
+  }, [atomicOffset, isAzanEnabled, isTahajjudAlarmEnabled, prayerTimes, location.timezone, lastPlayedAzan, lastPlayedTahajjud]);
 
   // --- Location & Prayer Times ---
   const reverseGeocode = async (lat: number, lon: number) => {
@@ -705,8 +788,10 @@ function MainApp() {
 
       const timesList = [
         { name: 'فجر', time: new Date(`1970-01-01T${prayerTimes.Fajr}:00Z`) },
+        { name: 'طلوعِ آفتاب', time: new Date(`1970-01-01T${prayerTimes.Sunrise}:00Z`) },
         { name: 'اشراق', time: new Date(`1970-01-01T${addMinutes(prayerTimes.Sunrise, 15)}:00Z`) },
         { name: 'چاشت', time: new Date(`1970-01-01T${addMinutes(prayerTimes.Sunrise, 45)}:00Z`) },
+        { name: 'زوال', time: new Date(`1970-01-01T${addMinutes(prayerTimes.Dhuhr, -10)}:00Z`) },
         { name: 'ظہر', time: new Date(`1970-01-01T${prayerTimes.Dhuhr}:00Z`) },
         { name: 'عصر', time: new Date(`1970-01-01T${prayerTimes.Asr}:00Z`) },
         { name: 'مغرب', time: new Date(`1970-01-01T${prayerTimes.Maghrib}:00Z`) },
@@ -909,38 +994,46 @@ function MainApp() {
 
         {/* Prayer Times Grid */}
         <div className="flex flex-wrap justify-center gap-3 mb-4">
-          <button 
-            onClick={toggleAzan}
-            className={cn(
-              "flex items-center gap-3 px-6 py-2.5 rounded-full border-2 transition-all duration-300 font-bold text-lg shadow-lg",
-              isAzanEnabled 
-                ? "bg-green-900/40 border-gold text-gold-light shadow-[0_0_20px_rgba(212,175,55,0.2)]" 
-                : "bg-black/40 border-gray-800 text-gray-500"
-            )}
-          >
-            <span className="text-2xl">{isAzanEnabled ? "🔔" : "🔕"}</span>
-            <span>{isAzanEnabled ? "اذان: آن" : "اذان: آف"}</span>
-          </button>
+          <div className="flex flex-col items-center gap-1">
+            <button 
+              onClick={toggleAzan}
+              className={cn(
+                "flex items-center gap-3 px-6 py-2.5 rounded-full border-2 transition-all duration-300 font-bold text-lg shadow-lg",
+                isAzanEnabled 
+                  ? "bg-green-900/40 border-gold text-gold-light shadow-[0_0_20px_rgba(212,175,55,0.2)]" 
+                  : "bg-black/40 border-gray-800 text-gray-500"
+              )}
+            >
+              <span className="text-2xl">{isAzanEnabled ? "🔔" : "🔕"}</span>
+              <span>{isAzanEnabled ? "اذان: آن" : "اذان: آف"}</span>
+            </button>
+            <button onClick={testAzan} className="text-[10px] text-gold-light/50 hover:text-gold-light underline">ٹیسٹ اذان (آن/آف)</button>
+          </div>
 
-          <button 
-            onClick={toggleTahajjudAlarm}
-            className={cn(
-              "flex items-center gap-3 px-6 py-2.5 rounded-full border-2 transition-all duration-300 font-bold text-lg shadow-lg",
-              isTahajjudAlarmEnabled 
-                ? "bg-blue-900/40 border-blue-400 text-blue-200 shadow-[0_0_20px_rgba(96,165,250,0.2)]" 
-                : "bg-black/40 border-gray-800 text-gray-500"
-            )}
-          >
-            <span className="text-2xl">{isTahajjudAlarmEnabled ? "⏰" : "💤"}</span>
-            <span>{isTahajjudAlarmEnabled ? "تہجد الارم: آن" : "تہجد الارم: آف"}</span>
-          </button>
+          <div className="flex flex-col items-center gap-1">
+            <button 
+              onClick={toggleTahajjudAlarm}
+              className={cn(
+                "flex items-center gap-3 px-6 py-2.5 rounded-full border-2 transition-all duration-300 font-bold text-lg shadow-lg",
+                isTahajjudAlarmEnabled 
+                  ? "bg-blue-900/40 border-blue-400 text-blue-200 shadow-[0_0_20px_rgba(96,165,250,0.2)]" 
+                  : "bg-black/40 border-gray-800 text-gray-500"
+              )}
+            >
+              <span className="text-2xl">{isTahajjudAlarmEnabled ? "⏰" : "💤"}</span>
+              <span>{isTahajjudAlarmEnabled ? "تہجد الارم: آن" : "تہجد الارم: آف"}</span>
+            </button>
+            <button onClick={testTahajjud} className="text-[10px] text-blue-400/50 hover:text-blue-400 underline">ٹیسٹ الارم (آن/آف)</button>
+          </div>
         </div>
         <SectionTitle>اوقاتِ نماز (فقہ حنفی)</SectionTitle>
         <div className="grid grid-cols-3 gap-2 text-center">
           {[
             { name: 'فجر', time: formatTime(prayerTimes?.Fajr), icon: <Sunrise className="w-4 h-4" /> },
+            { name: 'طلوعِ آفتاب', time: formatTime(prayerTimes?.Sunrise), special: true },
             { name: 'اشراق', time: formatTime(addMins(prayerTimes?.Sunrise, 15)), special: true },
             { name: 'چاشت', time: formatTime(addMins(prayerTimes?.Sunrise, 45)), special: true },
+            { name: 'زوال', time: formatTime(addMins(prayerTimes?.Dhuhr, -10)), special: true },
             { name: 'ظہر', time: formatTime(prayerTimes?.Dhuhr), icon: <Sun className="w-4 h-4" /> },
             { name: 'عصر', time: formatTime(prayerTimes?.Asr) },
             { name: 'مغرب', time: formatTime(prayerTimes?.Maghrib), icon: <Sunset className="w-4 h-4" /> },
@@ -1190,8 +1283,21 @@ function MainApp() {
       <footer className="mt-8 text-gray-400 text-sm text-center">
         &copy; {new Date().getFullYear()} معمولاتِ سیفیہ - تمام حقوق محفوظ ہیں۔
       </footer>
-      <audio ref={azanAudioRef} src="https://www.islamcan.com/audio/adhan/azan1.mp3" preload="auto" />
-      <audio ref={tahajjudAudioRef} src="https://www.soundjay.com/clock/sounds/alarm-clock-01.mp3" preload="auto" />
+      <audio 
+        ref={azanAudioRef} 
+        preload="auto" 
+        onError={(e) => console.error("Azan audio load error", e.currentTarget.error?.message)}
+      >
+        <source src="https://www.islamcan.com/audio/adhan/azan1.mp3" type="audio/mpeg" />
+      </audio>
+      <audio 
+        ref={tahajjudAudioRef} 
+        preload="auto" 
+        loop
+        onError={(e) => console.error("Tahajjud audio load error", e.currentTarget.error?.message)}
+      >
+        <source src="https://www.islamcan.com/audio/adhan/azan2.mp3" type="audio/mpeg" />
+      </audio>
     </div>
   );
 }
