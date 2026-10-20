@@ -294,7 +294,7 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const audioUrl = surahNum === 78 
-    ? `https://server11.mp3quran.net/balila/078.mp3`
+    ? `https://download.quranicaudio.com/quran/bandar_baleela/078.mp3`
     : `https://cdn.islamic.network/quran/audio-surah/128/ar.bandarbalila/${surahNum}.mp3`;
 
   // Slightly Faster Speed for Bandar Balila
@@ -315,10 +315,9 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     } else {
       setIsAudioLoading(true);
       
-      // Robust Loading: Ensure fresh source and load before play
-      if (audio.src !== audioUrl) {
+      // Robust Loading: Ensure source is assigned
+      if (!audio.src || !audio.src.includes('.mp3')) {
         audio.src = audioUrl;
-        audio.load();
       }
       
       audio.playbackRate = 1.15;
@@ -328,6 +327,10 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
           setIsAudioLoading(false);
         })
         .catch(err => {
+          if (err.name === 'AbortError') {
+            setIsAudioLoading(false);
+            return;
+          }
           console.log("Audio playback error, retrying load:", err);
           // Auto-Recovery: call load() and then retry play()
           audio.load();
@@ -337,9 +340,28 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
               setIsAudioLoading(false);
             })
             .catch(retryErr => {
-              console.log("Retry failed:", retryErr);
-              setIsAudioLoading(false);
-              setIsPlaying(false);
+              if (retryErr.name === 'AbortError') {
+                setIsAudioLoading(false);
+                return;
+              }
+              console.log("Retry failed, trying backup source:", retryErr);
+              // Fallback for Surah 78 if primary network blocks
+              if (surahNum === 78 && !audio.src.includes('alafasy')) {
+                audio.src = 'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/78.mp3';
+                audio.load();
+                audio.play()
+                  .then(() => {
+                    setIsPlaying(true);
+                    setIsAudioLoading(false);
+                  })
+                  .catch(() => {
+                    setIsAudioLoading(false);
+                    setIsPlaying(false);
+                  });
+              } else {
+                setIsAudioLoading(false);
+                setIsPlaying(false);
+              }
             });
         });
     }
@@ -374,6 +396,7 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     <div className="relative">
       <audio 
         ref={audioRef} 
+        src={audioUrl}
         onPlay={() => {
           setIsPlaying(true);
           setIsAudioLoading(false);
@@ -383,6 +406,14 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
         onEnded={() => setIsPlaying(false)}
         onWaiting={() => setIsAudioLoading(true)}
         onCanPlay={() => setIsAudioLoading(false)}
+        onError={() => {
+          const audio = audioRef.current;
+          if (audio && surahNum === 78 && !audio.dataset.retried) {
+            audio.dataset.retried = 'true';
+            audio.src = 'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/78.mp3';
+            audio.load();
+          }
+        }}
         preload="metadata"
         playsInline
       />
