@@ -283,28 +283,116 @@ const Accordion: React.FC<AccordionProps> = ({ title, children, onOpen, extra })
 };
 
 /**
- * قرآن باکس کمپوننٹ - شیخ بندر بن بلیا
+ * قرآن باکس کمپوننٹ - تلاوت و معمولاتِ قرآنی
  */
-const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string }) => {
+interface QuranBoxProps {
+  surahNum: number;
+  surahName: string;
+  hasLastRuku?: boolean;
+  lastRukuStartAyah?: number;
+  lastRukuEndAyah?: number;
+}
+
+interface AyahData {
+  numberInSurah: number;
+  text: string;
+  audio?: string;
+}
+
+const QuranBox: React.FC<QuranBoxProps> = ({ 
+  surahNum, 
+  surahName, 
+  hasLastRuku = false, 
+  lastRukuStartAyah, 
+  lastRukuEndAyah 
+}) => {
+  const [fullAyahs, setFullAyahs] = useState<AyahData[]>([]);
   const [text, setText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [mode, setMode] = useState<'lastRuku' | 'full'>(hasLastRuku ? 'lastRuku' : 'full');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [currentAyahIdx, setCurrentAyahIdx] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const audioUrl = surahNum === 78 
     ? `https://download.quranicaudio.com/quran/bandar_baleela/078.mp3`
     : `https://cdn.islamic.network/quran/audio-surah/128/ar.bandarbalila/${surahNum}.mp3`;
 
-  // Slightly Faster Speed for Bandar Balila
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = 1.15;
-    }
-  }, [surahNum, isPlaying]);
+  // Dynamic Accordion title
+  const displayTitle = hasLastRuku 
+    ? (mode === 'lastRuku' ? `${surahName} (صرف آخری رکوع)` : `${surahName} (مکمل سورت)`)
+    : surahName;
 
-  const toggleAudio = (e: React.MouseEvent) => {
+  // Ayahs to display based on selected mode
+  const displayedAyahs = React.useMemo(() => {
+    if (!fullAyahs || fullAyahs.length === 0) return [];
+    if (hasLastRuku && mode === 'lastRuku' && lastRukuStartAyah && lastRukuEndAyah) {
+      return fullAyahs.filter(a => a.numberInSurah >= lastRukuStartAyah && a.numberInSurah <= lastRukuEndAyah);
+    }
+    return fullAyahs;
+  }, [fullAyahs, mode, hasLastRuku, lastRukuStartAyah, lastRukuEndAyah]);
+
+  const fetchSurahData = async (): Promise<AyahData[]> => {
+    if (fullAyahs.length > 0) return fullAyahs;
+
+    const cacheKey = `surah_v2_ayahs_${surahNum}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setFullAyahs(parsed);
+          return parsed;
+        }
+      } catch {
+        // ignore cache parse error
+      }
+    }
+
+    setLoading(true);
+    setError(false);
+    try {
+      const edition = hasLastRuku ? 'ar.alafasy' : '';
+      const url = edition 
+        ? `https://api.alquran.cloud/v1/surah/${surahNum}/${edition}`
+        : `https://api.alquran.cloud/v1/surah/${surahNum}`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('API Error');
+      const data = await res.json();
+      if (!data.data || !data.data.ayahs) throw new Error('Invalid Data');
+
+      const parsedAyahs: AyahData[] = data.data.ayahs.map((a: any) => ({
+        numberInSurah: a.numberInSurah,
+        text: a.text,
+        audio: a.audio
+      }));
+
+      localStorage.setItem(cacheKey, JSON.stringify(parsedAyahs));
+      setFullAyahs(parsedAyahs);
+      return parsedAyahs;
+    } catch (err) {
+      console.error(`Fetch error for Surah ${surahNum}:`, err);
+      setError(true);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleModeChange = (newMode: 'lastRuku' | 'full') => {
+    if (mode === newMode) return;
+    if (isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+    setCurrentAyahIdx(0);
+    setMode(newMode);
+  };
+
+  const toggleAudio = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const audio = audioRef.current;
     if (!audio) return;
@@ -312,14 +400,45 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
+      return;
+    }
+
+    if (hasLastRuku && mode === 'lastRuku') {
+      setIsAudioLoading(true);
+      let ayahs = fullAyahs;
+      if (ayahs.length === 0) {
+        ayahs = await fetchSurahData();
+      }
+
+      const targetAyahs = ayahs.filter(a => 
+        (!lastRukuStartAyah || a.numberInSurah >= lastRukuStartAyah) && 
+        (!lastRukuEndAyah || a.numberInSurah <= lastRukuEndAyah)
+      );
+
+      if (targetAyahs.length === 0) {
+        setIsAudioLoading(false);
+        return;
+      }
+
+      const startIdx = (currentAyahIdx >= 0 && currentAyahIdx < targetAyahs.length) ? currentAyahIdx : 0;
+      setCurrentAyahIdx(startIdx);
+      audio.src = targetAyahs[startIdx].audio || '';
+      audio.playbackRate = 1.0;
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsAudioLoading(false);
+        })
+        .catch(err => {
+          console.error("Audio playback error:", err);
+          setIsAudioLoading(false);
+          setIsPlaying(false);
+        });
     } else {
       setIsAudioLoading(true);
-      
-      // Robust Loading: Ensure source is assigned
       if (!audio.src || !audio.src.includes('.mp3')) {
         audio.src = audioUrl;
       }
-      
       audio.playbackRate = 1.15;
       audio.play()
         .then(() => {
@@ -332,7 +451,6 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
             return;
           }
           console.log("Audio playback error, retrying load:", err);
-          // Auto-Recovery: call load() and then retry play()
           audio.load();
           audio.play()
             .then(() => {
@@ -344,8 +462,6 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
                 setIsAudioLoading(false);
                 return;
               }
-              console.log("Retry failed, trying backup source:", retryErr);
-              // Fallback for Surah 78 if primary network blocks
               if (surahNum === 78 && !audio.src.includes('alafasy')) {
                 audio.src = 'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/78.mp3';
                 audio.load();
@@ -367,28 +483,23 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     }
   };
 
-  const fetchSurah = async () => {
-    const cached = localStorage.getItem(`surah_${surahNum}`);
-    if (cached && cached !== "ERROR") {
-      setText(cached);
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
-    try {
-      const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}`);
-      if (!res.ok) throw new Error('API Error');
-      const data = await res.json();
-      if (!data.data || !data.data.ayahs) throw new Error('Invalid Data');
-      const fullText = data.data.ayahs.map((a: any) => a.text).join('  ');
-      localStorage.setItem(`surah_${surahNum}`, fullText);
-      setText(fullText);
-    } catch (err) {
-      console.error(`Fetch error for Surah ${surahNum}:`, err);
-      setError(true);
-    } finally {
-      setLoading(false);
+  const handleAudioEnded = () => {
+    if (hasLastRuku && mode === 'lastRuku') {
+      const targetAyahs = displayedAyahs;
+      if (currentAyahIdx < targetAyahs.length - 1) {
+        const nextIdx = currentAyahIdx + 1;
+        setCurrentAyahIdx(nextIdx);
+        const audio = audioRef.current;
+        if (audio && targetAyahs[nextIdx]?.audio) {
+          audio.src = targetAyahs[nextIdx].audio;
+          audio.play().catch(console.error);
+        }
+      } else {
+        setIsPlaying(false);
+        setCurrentAyahIdx(0);
+      }
+    } else {
+      setIsPlaying(false);
     }
   };
 
@@ -396,14 +507,12 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
     <div className="relative">
       <audio 
         ref={audioRef} 
-        src={audioUrl}
         onPlay={() => {
           setIsPlaying(true);
           setIsAudioLoading(false);
-          if (audioRef.current) audioRef.current.playbackRate = 1.15;
         }}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleAudioEnded}
         onWaiting={() => setIsAudioLoading(true)}
         onCanPlay={() => setIsAudioLoading(false)}
         onError={() => {
@@ -418,8 +527,8 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
         playsInline
       />
       <Accordion 
-        title={surahName} 
-        onOpen={fetchSurah}
+        title={displayTitle} 
+        onOpen={fetchSurahData}
         extra={
           <div className="flex items-center gap-2">
             <button 
@@ -430,7 +539,7 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
                 isPlaying ? "bg-gold text-black scale-110" : "bg-gold/20 text-gold hover:bg-gold/40",
                 isAudioLoading && "opacity-50 cursor-wait"
               )}
-              title={isPlaying ? "روکیں" : "سنیں (شیخ بندر بن بلیا)"}
+              title={isPlaying ? "روکیں" : "سنیں"}
             >
               {isAudioLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -444,15 +553,89 @@ const QuranBox = ({ surahNum, surahName }: { surahNum: number; surahName: string
         }
       >
         <div className="max-height-[400px] overflow-y-auto quran-box">
+          {/* Mode Switcher for Last Ruku / Full Surah */}
+          {hasLastRuku && (
+            <div className="flex justify-center items-center gap-2 mb-4 bg-black/40 p-1.5 rounded-full border border-gold/30 max-w-xs mx-auto">
+              <button
+                type="button"
+                onClick={() => handleModeChange('lastRuku')}
+                className={cn(
+                  "flex-1 py-1 px-3 rounded-full text-sm font-bold transition-all",
+                  mode === 'lastRuku'
+                    ? "bg-gold text-black shadow-md font-black"
+                    : "text-gray-300 hover:text-gold"
+                )}
+              >
+                آخری رکوع (معمولات)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleModeChange('full')}
+                className={cn(
+                  "flex-1 py-1 px-3 rounded-full text-sm font-bold transition-all",
+                  mode === 'full'
+                    ? "bg-gold text-black shadow-md font-black"
+                    : "text-gray-300 hover:text-gold"
+                )}
+              >
+                مکمل سورت
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col items-center mb-4 gap-2">
             <div className="bg-gold/10 border border-gold/30 rounded-lg px-4 py-2 flex items-center gap-2 text-gold-light text-sm">
               <Volume2 className="w-4 h-4" />
-              <span>تلاوت: شیخ بندر بن بلیا</span>
+              <span>
+                {hasLastRuku && mode === 'lastRuku' 
+                  ? "تلاوت آخری رکوع: شیخ مشاری راشد العفاسی" 
+                  : "تلاوت: شیخ بندر بن بلیا"}
+              </span>
             </div>
           </div>
+
           {loading && <div className="text-center text-green-300 py-4">لوڈ ہو رہا ہے...</div>}
           {error && <div className="text-center text-red-400 py-4">انٹرنیٹ کا مسئلہ ہے۔</div>}
-          {text && <span className="arabic-text text-2xl text-gold-light leading-[2.2] block text-center drop-shadow-md">{text}</span>}
+
+          {hasLastRuku && mode === 'lastRuku' && (
+            <div className="bg-gold/10 border border-gold/30 rounded-xl p-2.5 mb-4 text-center">
+              <span className="text-gold-light font-bold text-sm block">
+                آیات نمبر: {lastRukuStartAyah} تا {lastRukuEndAyah} (آخری رکوع)
+              </span>
+              <span className="text-[11px] text-gray-300">
+                سلسلہ عالیہ سیفیہ کے معمولات کے مطابق نماز کے بعد آخری رکوع کی تلاوت کی جاتی ہے۔
+              </span>
+            </div>
+          )}
+
+          {/* Bismillah */}
+          <div className="text-center mb-4">
+            <span className="arabic-text text-2xl text-gold block">
+              بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ
+            </span>
+          </div>
+
+          {displayedAyahs.length > 0 && (
+            <div className="arabic-text text-2xl text-gold-light leading-[2.4] text-center drop-shadow-md">
+              {displayedAyahs.map((a, i) => {
+                const isCurrent = hasLastRuku && mode === 'lastRuku' && isPlaying && currentAyahIdx === i;
+                return (
+                  <span 
+                    key={a.numberInSurah} 
+                    className={cn(
+                      "transition-all duration-300 inline",
+                      isCurrent && "text-yellow-300 bg-gold/25 rounded px-1.5 py-0.5 shadow-sm font-semibold"
+                    )}
+                  >
+                    {a.text}{' '}
+                    <span className="text-gold text-lg px-1 inline-block font-sans">
+                      ۝{a.numberInSurah}
+                    </span>{' '}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </Accordion>
     </div>
@@ -1090,9 +1273,21 @@ function MainApp() {
         {/* Quranic Surahs */}
         <SectionTitle>قرآنی سورتیں (معمولات)</SectionTitle>
         <QuranBox surahNum={36} surahName="نماز فجر (سورہ یٰسین)" />
-        <QuranBox surahNum={48} surahName="نماز ظہر (سورہ فتح)" />
+        <QuranBox 
+          surahNum={48} 
+          surahName="نماز ظہر (سورہ فتح)" 
+          hasLastRuku={true}
+          lastRukuStartAyah={27}
+          lastRukuEndAyah={29}
+        />
         <QuranBox surahNum={78} surahName="نماز عصر (سورہ نبا)" />
-        <QuranBox surahNum={56} surahName="نماز مغرب (سورہ واقعہ)" />
+        <QuranBox 
+          surahNum={56} 
+          surahName="نماز مغرب (سورہ واقعہ)" 
+          hasLastRuku={true}
+          lastRukuStartAyah={75}
+          lastRukuEndAyah={96}
+        />
         <QuranBox surahNum={67} surahName="نماز عشاء (سورہ ملک)" />
         <QuranBox surahNum={18} surahName="جمعہ کے دن (سورہ کہف)" />
 
